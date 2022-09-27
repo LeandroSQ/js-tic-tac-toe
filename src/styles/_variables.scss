@@ -1,0 +1,19 @@
+/* Light mode */
+html {
+	--background: #d8e0e6;
+	--board-background: #efefef;
+	--board-border: #ccc;
+	--player-x: #F71735;
+	--player-o: #98CE00;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+	html {
+		--background: #212121;
+		--board-background: #2A2D34;
+		--board-border: #3e475d;
+		--player-x: #E84855;
+		--player-o: #449C7C;
+	}
+}
