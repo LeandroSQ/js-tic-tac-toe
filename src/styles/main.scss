@@ -1,4 +1,4 @@
-@import "variables", "animations";
+@import "variables", "animations", "shadow", "gradient";
 
 * {
 	margin: 0px;
@@ -10,12 +10,16 @@
 }
 
 html, body {
-	background-color: var(--background);
 	color: var(--foreground);
 	overflow: hidden;
 	width: 100vw;
 	height: 100%;
 	height: -webkit-fill-available;
+}
+
+html {
+	background-color: var(--background);
+	@include animated-gradient(#1eb4ff, #7e46ee, #e4327c, #f76b1c);
 }
 
 body {
@@ -25,4 +29,23 @@ body {
 	flex-wrap: wrap;
 	transform: translateZ(0);
 	-webkit-font-smoothing: subpixel-antialiased;
+}
+
+div#container {
+	canvas {
+		background-color: var(--board-background);
+		border: 1px solid var(--board-border);
+		border-radius: 15pt;
+		// box-shadow: 0pt 5pt 10pt -3pt rgba(0, 0, 0, 0.6);
+		box-shadow: 0pt 5pt 10pt -3pt var(--board-background);
+
+		transition: box-shadow ease 1s, border-color ease 1s, background-color ease 1s;
+
+		image-rendering: -moz-crisp-edges;
+		image-rendering: -webkit-crisp-edges;
+		image-rendering: pixelated;
+		image-rendering: crisp-edges;
+	}
+
+	animation: animate-fade-in 250ms ease-in 250ms 1 both;
 }

@@ -1,4 +1,5 @@
-import { BORDER_RADIUS, CELL_EMPTY, CELL_X, CELL_O, TIE } from "../constants";
+/* eslint-disable max-depth */
+import { CELL_EMPTY, CELL_X, CELL_O, TIE } from "../constants";
 
 /**
  * @typedef {import("./../main.js").Main} Main
@@ -7,7 +8,6 @@ import { BORDER_RADIUS, CELL_EMPTY, CELL_X, CELL_O, TIE } from "../constants";
 export class Board {
 
 	/**
-	 *
 	 * @param {Main} main
 	 */
 	constructor(main) {
@@ -21,7 +21,7 @@ export class Board {
 		this.height = 0;
 
 		// Initialize cells
-		this.cells = this.#createEmptyMatrix(CELL_EMPTY);
+		this.reset();
 	}
 
 	/**
@@ -32,64 +32,29 @@ export class Board {
 	 * @param {number} viewport.height
 	 */
 	layout(viewport) {
+		const padding = this.main.canvas.drawRatio;
+
 		// Calculate the minimum possible size, given the screen width, leaving a padding equivalent to 2 cells
 		const amountOfCellsPerAxis = Math.min(this.columns, this.rows);
 		this.cellSize = Math.min(viewport.width, viewport.height) / (amountOfCellsPerAxis * 1.5);
-		this.width = parseInt(this.cellSize * amountOfCellsPerAxis);
-		this.height = parseInt(this.cellSize * amountOfCellsPerAxis);
-
-		// Calculate the sizing, centering the board in the screen
-		this.x = viewport.width / 2 - this.width / 2;
-		this.y = viewport.height / 2 - this.height / 2;
-	}
-
-	update() {
-		const mX = this.main.mouse.position.x;
-		const mY = this.main.mouse.position.y;
-		let isMouseOverEmptyCell = false;
-
-		// Check if the mouse is within the board's bounds
-		if (mX >= this.x && mX <= this.x + this.width && mY >= this.y && mY <= this.y + this.height) {
-			// Localize coordinates to row and column
-			const col = parseInt((mX - this.x) / this.cellSize);
-			const row = parseInt((mY - this.y) / this.cellSize);
-
-			// Search for the cell in the localized coordinates
-			const cell = this.cells[row][col];
-			isMouseOverEmptyCell = cell == CELL_EMPTY;
-
-			// If clicking
-			if (isMouseOverEmptyCell && this.main.mouse.isClicking) {
-				this.cells[row][col] = this.main.turn;
-
-				// Check if the game has finished
-				const winner = this.checkRules();
-				console.log(`Winner: ${winner == CELL_O ? "O" : winner == CELL_X ? "X" : "none"}`);
-
-				// Hack: schedules after this frame to make the canvas dirty
-				setTimeout(this.main.invalidate.bind(this.main), 0);
-
-				// Calls for next turn
-				this.main.nextTurn();
-			}
-		}
-
-		document.body.style.cursor = isMouseOverEmptyCell ? "pointer" : "unset";
+		this.width = Math.ceil(this.cellSize * amountOfCellsPerAxis + padding);
+		this.height = Math.ceil(this.cellSize * amountOfCellsPerAxis + padding);
 	}
 
 	// #region Rule validation
 	#checkHorizontalLines() {
-		const traversed = this.#createEmptyMatrix(0);
+		const traversed = this.#createEmptyMatrix("#");
+		let y = 0;
 		let winner = null;
 
 		// Check for horizontal lines
-		for (let y = 0; y < this.rows; y++) {
+		for (y = 0; y < this.rows; y++) {
 			winner = this.cells[y][0];
 
 			for (let x = 1; x < this.columns; x++) {
 				const cell = this.cells[y][x];
 
-				traversed[y][x] = 1;
+				if (DEBUG) traversed[y][x] = 1;
 
 				// The cell differs from the last one, or is empty, disqualifying this row as filled
 				if (cell === CELL_EMPTY || cell !== this.cells[y][x - 1]) {
@@ -101,24 +66,38 @@ export class Board {
 			if (winner) break;
 		}
 
-		console.matrix(traversed, "Horizontal lines");
+		if (DEBUG) console.matrix(traversed, "Horizontal lines");
 
-		// Return winner
-		return winner;
+		// Return the winner and the line coordinates, within the grid
+		if (winner)
+			return {
+				winner,
+				start: {
+					x: 0,
+					y: y
+				},
+				end: {
+					x: this.columns - 1,
+					y: y
+				}
+			};
+
+		return null;
 	}
 
 	#checkVerticalLines() {
-		const traversed = this.#createEmptyMatrix(0);
+		const traversed = this.#createEmptyMatrix("#");
+		let x = 0;
 		let winner = null;
 
 		// Check for vertical lines
-		for (let x = 0; x < this.columns; x++) {
-			winner = this.cells[0][x];
+		for (x = 0; x < this.columns; x++) {
+			winner = this.cells[1][x];
 
 			for (let y = 1; y < this.rows; y++) {
 				const cell = this.cells[y][x];
 
-				traversed[y][x] = 1;
+				if (DEBUG) traversed[y][x] = 1;
 
 				// If the cell differs from the last one, or is empty, disqualifying this row as filled
 				if (cell === CELL_EMPTY || cell !== this.cells[y - 1][x]) {
@@ -130,14 +109,27 @@ export class Board {
 			if (winner) break;
 		}
 
-		console.matrix(traversed, "Vertical lines");
+		if (DEBUG) console.matrix(traversed, "Vertical lines");
 
-		// Return winner
-		return winner;
+		// Return the winner and the line coordinates, within the grid
+		if (winner)
+			return {
+				winner,
+				start: {
+					x: x,
+					y: 0
+				},
+				end: {
+					x: x,
+					y: this.rows - 1
+				}
+			};
+
+		return null;
 	}
 
 	#checkTopLeftDiagonalLine() {
-		const traversed = this.#createEmptyMatrix(0);
+		const traversed = this.#createEmptyMatrix("#");
 		let winner = this.cells[1][1];
 
 		// X - -
@@ -147,7 +139,7 @@ export class Board {
 		for (let x = 1; x < this.columns; x++) {
 			const cell = this.cells[x][x];
 
-			traversed[x][x] = 1;
+			if (DEBUG) traversed[x][x] = 1;
 
 			// If the cell differs from the last one, or is empty, disqualifying this row as filled
 			if (cell === CELL_EMPTY || cell !== this.cells[x - 1][x - 1]) {
@@ -156,14 +148,27 @@ export class Board {
 			}
 		}
 
-		console.matrix(traversed, "Diagonal top-left line");
+		if (DEBUG) console.matrix(traversed, "Diagonal top-left line");
 
-		// Return winner
-		return winner;
+		// Return the winner and the line coordinates, within the grid
+		if (winner)
+			return {
+				winner,
+				start: {
+					x: 0,
+					y: 0
+				},
+				end: {
+					x: this.columns - 1,
+					y: this.rows - 1
+				}
+			};
+
+		return null;
 	}
 
 	#checkTopRightDiagonalLine() {
-		const traversed = this.#createEmptyMatrix(0);
+		const traversed = this.#createEmptyMatrix("#");
 		let winner = this.cells[1][1];
 
 		// - - X
@@ -175,7 +180,7 @@ export class Board {
 			const x = y % (this.columns - 1);
 			const cell = this.cells[y][x];
 
-			traversed[y][x] = 1;
+			if (DEBUG) traversed[y][x] = 1;
 
 			// If the cell differs from the last one, or is empty, disqualifying this row as filled
 			if (cell === CELL_EMPTY || cell !== this.cells[y - 1][x + 1]) {
@@ -184,38 +189,46 @@ export class Board {
 			}
 		}
 
-		console.matrix(traversed, "Diagonal top-right line");
+		if (DEBUG) console.matrix(traversed, "Diagonal top-right line");
 
-		// Return winner
-		return winner;
+		// Return the winner and the line coordinates, within the grid
+		if (winner)
+			return {
+				winner,
+				start: {
+					x: this.columns - 1,
+					y: 0
+				},
+				end: {
+					x: 0,
+					y: this.rows - 1
+				}
+			};
+
+		return null;
 	}
 
 	#checkTie() {
-		for (let y = 0; y < this.rows; y++) {
-			for (let x = 0; x < this.columns; x++) {
-				const cell = this.cells[y][x];
-
-				// All cells must be filled
-				if (cell === CELL_EMPTY) return null;
-			}
-		}
-
 		// If all cells are filled, and the previous checks didn't find any winner, this is a tie
-		return TIE;
+		return this.isBoardFilled ? TIE : null;
 	}
 
 	checkRules() {
-		return this.#checkHorizontalLines() || this.#checkVerticalLines() || this.#checkTopLeftDiagonalLine() || this.#checkTopRightDiagonalLine() || this.#checkTie();
+		return (
+			this.#checkHorizontalLines() ||
+			this.#checkVerticalLines() ||
+			this.#checkTopLeftDiagonalLine() ||
+			this.#checkTopRightDiagonalLine() ||
+			this.#checkTie()
+		);
 	}
 	// #endregion
 
+	// #region Rendering
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
 	render(ctx) {
-		// Draws the background
-		this.#renderBackground(ctx);
-
 		// Draws the grid
 		this.#renderGrid(ctx);
 
@@ -231,29 +244,35 @@ export class Board {
 			for (let x = 0; x < this.columns; x++) {
 				const cell = this.cells[y][x];
 
-				// Fetch the correct image for the cell
-				const image = {
-					[CELL_EMPTY]: null,
-					[CELL_X]: this.main.imageX,
-					[CELL_O]: this.main.imageO
-				}[cell];
+				// Ignore empty cells
+				if (!cell) continue;
 
-				// Draw it, if not empty
-				if (image) {
-					image.drawBufferTo(
-						this.x + x * this.cellSize + this.cellSize / 2 - image.width / 2,
-						this.y + y * this.cellSize + this.cellSize / 2 - image.height / 2,
-						ctx
-					);
-				}
+				// Configure shadow
+				ctx.shadowBlur = 15;
+				ctx.shadowOffsetX = 0;
+				ctx.shadowOffsetY = 0;
+				ctx.shadowColor = cell === CELL_X ? this.main.theme.playerX : this.main.theme.playerO;
+
+				// Draw image
+				const image = cell === CELL_X ? this.main.imageX : this.main.imageO;
+				image.drawBufferTo(
+					this.x + x * this.cellSize + this.cellSize / 2 - image.width / 2,
+					this.y + y * this.cellSize + this.cellSize / 2 - image.height / 2,
+					ctx
+				);
 			}
 		}
+
+		ctx.resetShadow();
 	}
 
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
 	#renderGrid(ctx) {
+		ctx.strokeStyle = this.main.theme.boardBorder;
+		ctx.lineWidth = 1;
+
 		// Horizontal lines
 		for (let y = 1; y < this.rows; y++) {
 			ctx.beginPath();
@@ -272,30 +291,9 @@ export class Board {
 			ctx.closePath();
 		}
 	}
+	// #endregion
 
-	/**
-	 * @param {CanvasRenderingContext2D} ctx
-	 */
-	#renderBackground(ctx) {
-		ctx.beginPath();
-		ctx.shadowBlur = 30 * this.main.canvas.drawRatio;
-		ctx.shadowColor = "rgba(15, 6, 30, 0.35)";
-		ctx.shadowOffsetX = 0;
-		ctx.shadowOffsetY = 10 * this.main.canvas.drawRatio;
-		ctx.fillStyle = this.main.theme.boardBackground;
-		ctx.strokeStyle = this.main.theme.boardBorder;
-		ctx.roundRect(this.x, this.y, this.width, this.height, BORDER_RADIUS);
-		ctx.fill();
-		ctx.stroke();
-		ctx.closePath();
-
-		// Reset shadow
-		ctx.shadowBlur = 0;
-		ctx.shadowColor = "transparent";
-		ctx.shadowOffsetX = 0;
-		ctx.shadowOffsetY = 0;
-	}
-
+	// #region Utility
 	#createEmptyMatrix(value = CELL_EMPTY) {
 		const tmp = [];
 		for (let i = 0; i < this.rows; i++) {
@@ -308,5 +306,22 @@ export class Board {
 
 		return tmp;
 	}
+
+	get isBoardFilled() {
+		for (let y = 0; y < this.rows; y++) {
+			for (let x = 0; x < this.columns; x++) {
+				const cell = this.cells[y][x];
+
+				if (cell === CELL_EMPTY) return false;
+			}
+		}
+
+		return true;
+	}
+
+	reset() {
+		this.cells = this.#createEmptyMatrix(CELL_EMPTY);
+	}
+	// #endregion
 
 }

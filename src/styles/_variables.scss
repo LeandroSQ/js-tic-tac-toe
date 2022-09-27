@@ -1,19 +1,32 @@
 /* Light mode */
 html {
-	--background: #d8e0e6;
-	--board-background: #efefef;
-	--board-border: #ccc;
-	--player-x: #F71735;
-	--player-o: #98CE00;
+	--background: #e7ebee;
+	--foreground: #212121;
+	--dim-background: rgba(212, 212, 212, 0.45);
+	--board-background: #f8f9fa;
+	--board-border: #e8ecef;
+	--player-x: #f62539;
+	--player-o: #15c04b;
+}
+
+body {
+	transition: background 1s ease, backdrop-filter 1s ease;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
 	html {
-		--background: #212121;
-		--board-background: #2A2D34;
-		--board-border: #3e475d;
-		--player-x: #E84855;
-		--player-o: #449C7C;
+		--background: black;
+		--foreground: #efefef;
+		--dim-background: rgba(0, 0, 0, 0.7);
+		--board-background: rgba(43, 43, 48, 0.45);
+		--board-border: rgba(0, 0, 0, 0.237);
+		--player-x: #e4327c;
+		--player-o: #1eb4ff;
+	}
+
+	body {
+		background-color: rgba(0, 0, 0, 0.75);
+		backdrop-filter: saturate(150%);
 	}
 }

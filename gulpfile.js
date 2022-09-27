@@ -11,7 +11,7 @@ const buffer = require("vinyl-buffer");
 const sass = require("gulp-sass")(require("sass"));
 const cssAutoPrefixer = require("gulp-autoprefixer");
 const concat = require("gulp-concat");
-const uglify = require("gulp-uglify");
+const terser = require("gulp-terser");
 const gulpIf = require("gulp-if");
 
 // Utilities
@@ -35,6 +35,10 @@ function isArgumentPassed(...args) {
 
 	return false;
 }
+
+// Env
+const isProduction = isArgumentPassed("production", "prod");
+console.log(isProduction ? "PRODUCTION" : "DEVELOPMENT");
 
 // Options
 const browserSyncOptions = {
@@ -70,8 +74,25 @@ const cssOptions = {
 	sourceMap: false,
 };
 
-const isProduction = isArgumentPassed("production", "prod");
-console.log(isProduction ? "PRODUCTION" : "DEVELOPMENT");
+const jsOptions = {
+	compress: {
+		unsafe: true,
+		unsafe_comps: true,
+		unsafe_arrows: true,
+		unsafe_proto: true,
+		unsafe_methods: true,
+		hoist_funs: true,
+		dead_code: true,
+		module: true,
+		global_defs: {
+			DEBUG: !isProduction,
+		},
+	},
+	mangle: {
+		module: true,
+		toplevel: true
+	}
+};
 
 // Tasks
 function reload() {
@@ -89,26 +110,6 @@ function watchHtml() {
 	return watch("src/**/*.html", handleHtml);
 }
 
-function debounce(func, wait, immediate) {
-	let timeout;
-
-	return function() {
-		// eslint-disable-next-line no-invalid-this
-		const context = this;
-		// eslint-disable-next-line prefer-rest-params
-		const args = arguments;
-
-		const later = function() {
-			timeout = null;
-			if (!immediate) func.apply(context, args);
-		};
-		const callNow = immediate && !timeout;
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-		if (callNow) func.apply(context, args);
-	};
-}
-
 function handleJs() {
 	return browserify(browserifyOptions)
 		.transform(babelify, babelOptions)
@@ -116,7 +117,7 @@ function handleJs() {
 		.pipe(source("script.min.js"))
 		.pipe(buffer())
 		.pipe(sourcemaps.init({ loadMaps: true }))
-		.pipe(gulpIf(isProduction, uglify()))
+		.pipe(gulpIf(isProduction, terser(jsOptions)))
 		.pipe(sourcemaps.write("./"))
 		.pipe(dest("./dist/scripts"))
 		.pipe(reload());
@@ -133,16 +134,7 @@ function handleAssets() {
 }
 
 function watchAssets() {
-	return watch(
-		[
-			"src/image/**.*",
-			"src/audio/**.*",
-			"src/font/**.*",
-			"src/lang/**.*",
-			"src/assets/**.*",
-		],
-		handleAssets
-	);
+	return watch("./src/assets/**/**.*", handleAssets);
 }
 
 function handleSCSS() {
@@ -160,34 +152,6 @@ function watchSCSS() {
 	return watch("./src/styles/**.scss", handleSCSS);
 }
 
-function buildDictionaries(done) {
-	const exec = require("child_process").execSync;
-	const fs = require("fs");
-	const path = require("path");
-	const root = path.join(__dirname, "data", "scripts");
-	const files = fs.readdirSync(root)
-		.filter((x) => x.endsWith("-lexicon.js"));
-
-	for (const script of files) {
-		console.log(`Executing ${script}...`);
-		const stdout = exec(`node ${path.join(root, script)}`);
-		console.log(stdout.toString("utf-8"));
-	}
-
-	done();
-}
-
-
-function handleDictionaries() {
-	return src("./data/cache/**.*")
-		.pipe(dest("./dist/lang"))
-		.pipe(reload());
-}
-
-function watchDictionaries() {
-	return watch("./data/cache/**.*", handleDictionaries);
-}
-
 function clean() {
 	return del("dist");
 }
@@ -198,21 +162,10 @@ function initialize() {
 
 // Export tasks
 module.exports.assets = handleAssets;
-module.exports.dict = series(buildDictionaries, handleDictionaries);
 module.exports.html = handleHtml;
 module.exports.js = handleJs;
 module.exports.scss = handleSCSS;
 module.exports.clean = clean;
-module.exports.build = function (done) {
-	const tasks = [handleDictionaries, handleAssets, handleSCSS, handleHtml, handleJs];
-
-	// If in production, build the dictionaries...
-	if (isProduction) tasks.unshift(buildDictionaries);
-
-	return series(clean, parallel(...tasks))(done);
-};
-module.exports.dev = series(
-	module.exports.build,
-	parallel(watchAssets, watchSCSS, watchHtml, watchJs, watchDictionaries, initialize)
-);
+module.exports.build = series(clean, parallel(handleAssets, handleSCSS, handleHtml, handleJs));
+module.exports.dev = series(module.exports.build, parallel(watchAssets, watchSCSS, watchHtml, watchJs, initialize));
 module.exports.default = module.exports.build;

@@ -1,7 +1,9 @@
 export class DensityCanvas {
 
 	constructor() {
+		/** @type {HTMLCanvasElement} */
 		this.canvas = document.createElement("canvas");
+		this.context = this.canvas.getContext("2d");
 		this.virtualWidth = null;
 		this.virtualHeight = null;
 		this.enableHighDPI = true;
@@ -21,38 +23,34 @@ export class DensityCanvas {
 		}
 	}
 
-	#getBackingStoreRatio(context) {
+	get backingStoreRatio() {
 		if (!this.enableHighDPI) return 0.05;
 
 		return (
-			context.webkitBackingStorePixelRatio ||
-			context.mozBackingStorePixelRatio ||
-			context.msBackingStorePixelRatio ||
-			context.oBackingStorePixelRatio ||
-			context.backingStorePixelRatio ||
+			this.context.webkitBackingStorePixelRatio ||
+			this.context.mozBackingStorePixelRatio ||
+			this.context.msBackingStorePixelRatio ||
+			this.context.oBackingStorePixelRatio ||
+			this.context.backingStorePixelRatio ||
 			1
 		);
 	}
 
-	#getDevicePixelRation() {
+	get devicePixelRatio() {
 		if (!this.enableHighDPI) return 0.05;
 
 		return window.devicePixelRatio || 1;
 	}
 
-	#getDrawRatio(backingStoreRatio, devicePixelRatio) {
-		return devicePixelRatio / backingStoreRatio;
+	get drawRatio() {
+		// Calculate the display density pixel ratio
+		return this.devicePixelRatio / this.backingStoreRatio;
 	}
 
 	// eslint-disable-next-line max-statements
 	setSize({ width, height }) {
-		// Calculate the display density pixel ratio
-		const backingStoreRatio = this.#getBackingStoreRatio(this.context);
-		const devicePixelRatio = this.#getDevicePixelRation();
-		this.drawRatio = this.#getDrawRatio(backingStoreRatio, devicePixelRatio);
-
 		// Set the canvas size
-		if (backingStoreRatio !== devicePixelRatio) {
+		if (this.backingStoreRatio !== this.devicePixelRatio) {
 			// Set the virtual canvas size to the real resolution
 			this.canvas.width = width * this.drawRatio;
 			this.canvas.height = height * this.drawRatio;
@@ -105,13 +103,6 @@ export class DensityCanvas {
 
 	get height() {
 		return this.virtualHeight || this.canvas.height;
-	}
-
-	/**
-	 * @return {CanvasRenderingContext2D}
-	 */
-	get context() {
-		return this.canvas.getContext("2d");
 	}
 
 }

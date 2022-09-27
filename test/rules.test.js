@@ -24,10 +24,12 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(CELL_O);
+				expect(result).not.toBeNull();
+				expect(result).not.toBeUndefined();
+				expect(result.winner).toBe(CELL_O);
 			});
 
 			test("Middle", () => {
@@ -40,10 +42,12 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(CELL_O);
+				expect(result).not.toBeNull();
+				expect(result).not.toBeUndefined();
+				expect(result.winner).toBe(CELL_O);
 			});
 
 			test("Bottom", () => {
@@ -56,10 +60,12 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(CELL_O);
+				expect(result).not.toBeNull();
+				expect(result).not.toBeUndefined();
+				expect(result.winner).toBe(CELL_O);
 			});
 		});
 
@@ -74,10 +80,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 
 			test("Middle", () => {
@@ -85,15 +91,15 @@ describe("Tic Tac Toe Rules", () => {
 				const board = boardMock();
 				board.cells = [
 					[CELL_EMPTY, CELL_EMPTY, CELL_EMPTY],
-					[CELL_O,     CELL_X,     CELL_O],
+					[CELL_O, CELL_X, CELL_O],
 					[CELL_EMPTY, CELL_EMPTY, CELL_EMPTY],
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 
 			test("Bottom", () => {
@@ -106,30 +112,52 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 		});
 	});
 
 	describe("Vertical lines", () => {
 		describe("Win", () => {
-			test("Left", () => {
-				// Arrange
-				const board = boardMock();
-				board.cells = [
-					[CELL_O, CELL_EMPTY, CELL_EMPTY],
-					[CELL_O, CELL_EMPTY, CELL_EMPTY],
-					[CELL_O, CELL_EMPTY, CELL_EMPTY],
-				];
+			describe("Left", () => {
+				test("1", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_O, CELL_EMPTY, CELL_EMPTY],
+						[CELL_O, CELL_EMPTY, CELL_EMPTY],
+						[CELL_O, CELL_EMPTY, CELL_EMPTY],
+					];
 
-				// Act
-				const winner = board.checkRules();
+					// Act
+					const result = board.checkRules();
 
-				// Assert
-				expect(winner).toBe(CELL_O);
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_O);
+				});
+
+				test("2", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_O, CELL_X, CELL_O],
+						[CELL_O, CELL_X, CELL_X],
+						[CELL_O, CELL_O, CELL_X],
+					];
+
+					// Act
+					const result = board.checkRules();
+
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_O);
+				});
 			});
 
 			test("Middle", () => {
@@ -142,26 +170,50 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(CELL_O);
+				expect(result).not.toBeNull();
+				expect(result).not.toBeUndefined();
+				expect(result.winner).toBe(CELL_O);
 			});
 
-			test("Right", () => {
-				// Arrange
-				const board = boardMock();
-				board.cells = [
-					[CELL_EMPTY, CELL_EMPTY, CELL_O],
-					[CELL_EMPTY, CELL_EMPTY, CELL_O],
-					[CELL_EMPTY, CELL_EMPTY, CELL_O],
-				];
+			describe("Right", () => {
+				test("1", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_EMPTY, CELL_EMPTY, CELL_O],
+						[CELL_EMPTY, CELL_EMPTY, CELL_O],
+						[CELL_EMPTY, CELL_EMPTY, CELL_O],
+					];
 
-				// Act
-				const winner = board.checkRules();
+					// Act
+					const result = board.checkRules();
 
-				// Assert
-				expect(winner).toBe(CELL_O);
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_O);
+				});
+
+				test("2", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_EMPTY, CELL_O, CELL_X],
+						[CELL_EMPTY, CELL_O, CELL_X],
+						[CELL_EMPTY, CELL_EMPTY, CELL_X],
+					];
+
+					// Act
+					const result = board.checkRules();
+
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_X);
+				});
 			});
 		});
 
@@ -176,10 +228,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 
 			test("Middle", () => {
@@ -192,10 +244,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 
 			test("Right", () => {
@@ -208,10 +260,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 		});
 	});
@@ -228,26 +280,50 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(CELL_O);
+				expect(result).not.toBeNull();
+				expect(result).not.toBeUndefined();
+				expect(result.winner).toBe(CELL_O);
 			});
 
-			test("Top right", () => {
-				// Arrange
-				const board = boardMock();
-				board.cells = [
-					[CELL_EMPTY, CELL_EMPTY, CELL_O],
-					[CELL_EMPTY, CELL_O, CELL_EMPTY],
-					[CELL_O, CELL_EMPTY, CELL_EMPTY],
-				];
+			describe("Top right", () => {
+				test("1", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_EMPTY, CELL_EMPTY, CELL_O],
+						[CELL_EMPTY, CELL_O, CELL_EMPTY],
+						[CELL_O, CELL_EMPTY, CELL_EMPTY],
+					];
 
-				// Act
-				const winner = board.checkRules();
+					// Act
+					const result = board.checkRules();
 
-				// Assert
-				expect(winner).toBe(CELL_O);
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_O);
+				});
+
+				test("2", () => {
+					// Arrange
+					const board = boardMock();
+					board.cells = [
+						[CELL_X, CELL_O, CELL_X],
+						[CELL_O, CELL_X, CELL_O],
+						[CELL_X, CELL_X, CELL_O],
+					];
+
+					// Act
+					const result = board.checkRules();
+
+					// Assert
+					expect(result).not.toBeNull();
+					expect(result).not.toBeUndefined();
+					expect(result.winner).toBe(CELL_X);
+				});
 			});
 		});
 
@@ -262,10 +338,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 
 			test("Top right", () => {
@@ -278,10 +354,10 @@ describe("Tic Tac Toe Rules", () => {
 				];
 
 				// Act
-				const winner = board.checkRules();
+				const result = board.checkRules();
 
 				// Assert
-				expect(winner).toBe(null);
+				expect(result).toBe(null);
 			});
 		});
 	});
@@ -297,10 +373,10 @@ describe("Tic Tac Toe Rules", () => {
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(TIE);
+			expect(result).toBe(TIE);
 		});
 
 		test("2", () => {
@@ -308,15 +384,15 @@ describe("Tic Tac Toe Rules", () => {
 			const board = boardMock();
 			board.cells = [
 				[CELL_O, CELL_O, CELL_X],
-				[CELL_O, CELL_X, CELL_X],
-				[CELL_X, CELL_O, CELL_X],
+				[CELL_X, CELL_X, CELL_O],
+				[CELL_O, CELL_O, CELL_X],
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(TIE);
+			expect(result).toBe(TIE);
 		});
 
 		test("3", () => {
@@ -329,10 +405,10 @@ describe("Tic Tac Toe Rules", () => {
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(TIE);
+			expect(result).toBe(TIE);
 		});
 	});
 
@@ -347,10 +423,10 @@ describe("Tic Tac Toe Rules", () => {
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(null);
+			expect(result).toBe(null);
 		});
 
 		test("2", () => {
@@ -363,10 +439,10 @@ describe("Tic Tac Toe Rules", () => {
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(null);
+			expect(result).toBe(null);
 		});
 
 		test("3", () => {
@@ -379,10 +455,26 @@ describe("Tic Tac Toe Rules", () => {
 			];
 
 			// Act
-			const winner = board.checkRules();
+			const result = board.checkRules();
 
 			// Assert
-			expect(winner).toBe(null);
+			expect(result).toBe(null);
+		});
+
+		test("4", () => {
+			// Arrange
+			const board = boardMock();
+			board.cells = [
+				[CELL_EMPTY, CELL_EMPTY, CELL_EMPTY],
+				[CELL_EMPTY, CELL_EMPTY, CELL_EMPTY],
+				[CELL_EMPTY, CELL_EMPTY, CELL_EMPTY],
+			];
+
+			// Act
+			const result = board.checkRules();
+
+			// Assert
+			expect(result).toBe(null);
 		});
 	});
 });

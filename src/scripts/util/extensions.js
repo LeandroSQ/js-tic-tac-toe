@@ -42,7 +42,7 @@ window.addLoadEventListener = function (handler, timeout = 1000) {
 };
 
 window.addVisibilityChangeEventListener = function (handler) {
-	const events = ["visibilitychange", "webkitvisibilitychange", "mozvisibilitychange", "msvisibilitychange"];
+	const prefixes = ["webkit", "moz", "ms", ""];
 
 	let fired = false;
 
@@ -50,12 +50,19 @@ window.addVisibilityChangeEventListener = function (handler) {
 		if (fired) return;
 		fired = true;
 
-		handler(!document.hidden);
+		const isDocumentHidden = prefixes
+			.map((x) => (x && x.length > 0 ? `${x}Hidden` : "hidden"))
+			.map((x) => document[x]).reduce((a, b) => a || b, false);
+
+		handler(!isDocumentHidden);
+
+		setTimeout(() => {
+			fired = false;
+		}, 100);
 	};
 
-	events.forEach((event) => {
-		window.addEventListener(event, _func);
-	});
+	for (const prefix of prefixes) document.addEventListener(`${prefix}visibilitychange`, _func);
+	document.onvisibilitychange = _func;
 };
 
 if (!CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) {
@@ -87,7 +94,8 @@ if (!CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) {
 
 String.prototype.toCamelCase = function() {
 	return this.replace("--", "")
-		.replace(/-./g, (x) => x[1].toUpperCase());
+		.replace(/-./g, (x) => x[1].toUpperCase())
+		.trim();
 };
 
 if (!window.hasOwnProperty("Color")) window.Color = { };
@@ -107,16 +115,45 @@ window.Color.isColorLight = function(hex) {
 console.matrix = function(matrix, hint=null) {
 	if (hint) console.log(hint);
 
-	let buffer = "";
+	let buffer = "%c";
 	for (const row of matrix) {
 		for (let col = 0; col < row.length; col++) {
-			buffer += row[col];
+			buffer += row[col] === null ? "#" : row[col];
 			if (col < row.length - 1) {
-				buffer += " ";
+				buffer += "";
 			}
 		}
 		buffer += "\n";
 	}
-	
-	console.log(buffer);
+
+	console.log(buffer,  "font-size: 1.2em; font-family: monospace; line-height: 0.6em");
+};
+
+HTMLCanvasElement.prototype.screenshot = function(filename="download.png") {
+	const a = document.createElement("a");
+	a.download = filename;
+	a.href = this.toDataURL("image/png;base64");
+	a.style.visibility = "hidden";
+	a.style.display = "none";
+	document.body.appendChild(a);
+
+	setTimeout(() => {
+		a.click();
+		document.body.removeChild(a);
+	}, 100);
+};
+
+CanvasRenderingContext2D.prototype.fillTextCentered = function(text, x, y) {
+	this.save();
+	this.textAlign = "center";
+	this.textBaseline = "middle";
+	this.fillText(text, x, y);
+	this.restore();
+};
+
+CanvasRenderingContext2D.prototype.resetShadow = function() {
+	this.shadowOffsetX = 0;
+	this.shadowOffsetY = 0;
+	this.shadowColor = "transparent";
+	this.shadowBlur = 0;
 };

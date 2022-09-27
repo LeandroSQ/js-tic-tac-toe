@@ -1,0 +1,22 @@
+@mixin animated-gradient($color...) {
+	background: linear-gradient(10deg, $color);
+	background-size: 100% * length($color) 95% * length($color);
+
+	z-index: -1;
+
+	animation: gradient-animation 7s cubic-bezier(0.455, 0.030, 0.515, 0.955) infinite;
+}
+
+@keyframes gradient-animation {
+	0% {
+		background-position: 51% 0%
+	}
+
+	50% {
+		background-position: 50% 100%
+	}
+
+	100% {
+		background-position: 51% 0%
+	}
+}

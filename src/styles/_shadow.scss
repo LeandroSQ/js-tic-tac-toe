@@ -1,0 +1,24 @@
+@mixin gradient-shadow($offsetX, $offsetY, $blur, $spread, $borderRadius) {
+	position: relative;
+	padding-left: $offsetX;
+	padding-right: $offsetX;
+	padding-top: $offsetY;
+	padding-bottom: $offsetY;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+
+		border-radius: $borderRadius * 2;
+
+		filter: blur($blur);
+	}
+
+	canvas {
+		border-radius: $borderRadius;
+	}
+}

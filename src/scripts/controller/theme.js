@@ -14,6 +14,12 @@ export class ThemeController {
 	background
 
 	/** @type {string} Represents a CSS variable */
+	foreground
+
+	/** @type {string} Represents a CSS variable */
+	dimBackground
+
+	/** @type {string} Represents a CSS variable */
 	boardBackground
 
 	/** @type {string} Represents a CSS variable */
@@ -37,7 +43,7 @@ export class ThemeController {
 
 	#loadVariables() {
 		// Define the CSS variables to keep track of
-		const variables = ["--background", "--board-background", "--board-border", "--player-x", "--player-o"];
+		const variables = ["--background", "--foreground", "--dim-background", "--board-background", "--board-border", "--player-x", "--player-o"];
 
 		console.groupCollapsed("Loading theme variables");
 
