@@ -4,11 +4,26 @@ import { DensityCanvas } from "../widget/density-canvas";
 
 export class ImageLoader {
 
+	/**
+	 * Resolves and expands an image to absolute path
+	 *
+	 * @param {string} identifier Specifies the image to be loaded
+	 * @return {string} The resolved path of the audio file
+	 */
+	static #resolvePath(identifier) {
+		const locationRoot = window.location.href.indexOf("http://localhost:")
+			? window.location.href
+			: window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/"));
+		const relativePath = "/assets/images/";
+
+		return locationRoot + relativePath + identifier;
+	}
+
 	static #loadImage(identifier) {
 		return new Promise((resolve, reject) => {
 			// Requests the image element
 			const img = document.createElement("img");
-			img.src = `/assets/images/${identifier}`;
+			img.src = this.#resolvePath(identifier);
 
 			img.onload = (e) => {
 				// Return it
@@ -37,10 +52,8 @@ export class ImageLoader {
 		const image = await this.#loadImage(identifier);
 
 		// If required, process it
-		if (options && (options.width || options.height || options.tint))
-			return this.process(image, options);
-		else
-			return image;
+		if (options && (options.width || options.height || options.tint)) return this.process(image, options);
+		else return image;
 	}
 
 	/**
