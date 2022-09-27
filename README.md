@@ -17,7 +17,7 @@ Javascript implementation of the game [Tic Tac Toe](https://en.wikipedia.org/wik
 </center>
 
 <center>
-	<a href="https://leandrosq.github.io/js-tic-tac-toe/">Live demo</a>
+	<a href="https://leandrosq.github.io/js-tic-tac-toe/">Live demo here</a>
 </center>
 
 
